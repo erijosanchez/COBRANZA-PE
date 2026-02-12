@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    // Agregar dentro del array de return:
+
+    'whatsapp' => [
+        'api_url' => env('WHATSAPP_API_URL', ''),
+        'token' => env('WHATSAPP_TOKEN', ''),
+        'phone_id' => env('WHATSAPP_PHONE_ID', ''),
+        'verify_token' => env('WHATSAPP_VERIFY_TOKEN', ''),
+    ],
+
+    'mercadopago' => [
+        'public_key' => env('MERCADOPAGO_PUBLIC_KEY', ''),
+        'access_token' => env('MERCADOPAGO_ACCESS_TOKEN', ''),
+        'webhook_secret' => env('MERCADOPAGO_WEBHOOK_SECRET', ''),
+    ],
+
 ];
