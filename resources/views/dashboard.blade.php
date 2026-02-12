@@ -269,4 +269,104 @@
             </div>
         </div>
     </div>
+    {{-- Gráficos --}}
+    <div class="row g-3 mt-2">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-graph-up me-1"></i> Recaudación mensual</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-pie-chart me-1"></i> Deudas por estado</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        // Recaudación mensual
+        const monthlyData = @json($monthlyCollections);
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'bar',
+            data: {
+                labels: monthlyData.map(m => m.month),
+                datasets: [{
+                    label: 'Recaudación (S/)',
+                    data: monthlyData.map(m => m.amount),
+                    backgroundColor: 'rgba(26, 86, 219, 0.7)',
+                    borderColor: 'rgba(26, 86, 219, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => 'S/ ' + ctx.parsed.y.toLocaleString('es-PE', {
+                                minimumFractionDigits: 2
+                            })
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: val => 'S/ ' + val.toLocaleString()
+                        }
+                    }
+                }
+            }
+        });
+
+        // Deudas por estado
+        const statusData = {
+            active: {{ \App\Models\Debt::byCompany(auth()->user()->company_id)->where('status', 'active')->count() }},
+            partial: {{ \App\Models\Debt::byCompany(auth()->user()->company_id)->where('status', 'partial')->count() }},
+            overdue: {{ \App\Models\Debt::byCompany(auth()->user()->company_id)->where('status', 'overdue')->count() }},
+            paid: {{ \App\Models\Debt::byCompany(auth()->user()->company_id)->where('status', 'paid')->count() }},
+        };
+
+        new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Activas', 'Parcial', 'Vencidas', 'Pagadas'],
+                datasets: [{
+                    data: [statusData.active, statusData.partial, statusData.overdue, statusData.paid],
+                    backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981'],
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+@endpush

@@ -18,6 +18,11 @@ use App\Http\Controllers\ReportController;
 
 Auth::routes(['register' => false]);
 
+// Webhooks (sin auth)
+Route::post('/webhooks/mercadopago', [App\Http\Controllers\WebhookController::class, 'mercadoPago'])
+    ->name('webhooks.mercadopago')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
